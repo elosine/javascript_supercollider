@@ -25,15 +25,6 @@ app.get('/', function(req, res) {
 app.use('/timesync', timesyncServer.requestHandler);
 //#endef END TIMESYNC SERVER
 
-//#ef SUPERCOLLIDERJS
-const sc = require("supercolliderjs");
-//put this on command from browser
-sc.server.boot().then(async sc => {
-  // Allocate an 8 second stereo audio buffer
-  const b = await sc.buffer(44 * 1024 * 8, 2);
-});
-//#endef SUPERCOLLIDERJS
-
 
 //#ef OSC.JS
 var osc = require("osc");
