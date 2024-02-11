@@ -25,62 +25,69 @@ app.get('/', function(req, res) {
 app.use('/timesync', timesyncServer.requestHandler);
 //#endef END TIMESYNC SERVER
 
+//#ef SUPERCOLLIDERJS
+const sc = require("supercolliderjs");
+//put this on command from browser
+sc.server.boot().then(async sc => {
+  // Allocate an 8 second stereo audio buffer
+  const b = await sc.buffer(44 * 1024 * 8, 2);
+});
+//#endef SUPERCOLLIDERJS
+
+
 //#ef OSC.JS
 var osc = require("osc");
 
 var udpPort = new osc.UDPPort({
-    // This is the port we're listening on.
-    localAddress: "127.0.0.1",
-    localPort: 57121,
+  // This is the port we're listening on.
+  localAddress: "127.0.0.1",
+  localPort: 57121,
 
-    // This is where sclang is listening for OSC messages.
-    remoteAddress: "127.0.0.1",
-    remotePort: 57120,
-    metadata: true
+  // This is where sclang is listening for OSC messages.
+  remoteAddress: "127.0.0.1",
+  remotePort: 57120,
+  metadata: true
 });
 
 // Open the socket.
 udpPort.open();
 
 // Every second, send an OSC message to SuperCollider
-setInterval(function() {
-    var msg = {
-        address: "/hello/from/oscjs",
-        args: [
-            {
-                type: "f",
-                value: Math.random()
-            },
-            {
-                type: "f",
-                value: Math.random()
-            }
-        ]
-    };
-
-    console.log("Sending message", msg.address, msg.args, "to", udpPort.options.remoteAddress + ":" + udpPort.options.remotePort);
-    console.log(msg);
-    udpPort.send(msg);
-}, 1000);
+// setInterval(function() {
+//   var msg = {
+//     address: "/hello/from/oscjs",
+//     args: [{
+//         type: "f",
+//         value: Math.random()
+//       },
+//       {
+//         type: "f",
+//         value: Math.random()
+//       }
+//     ]
+//   };
+//
+//   console.log("Sending message", msg.address, msg.args, "to", udpPort.options.remoteAddress + ":" + udpPort.options.remotePort);
+//   console.log(msg);
+//   udpPort.send(msg);
+// }, 1000);
 //#endef OSC.JS
-
 
 //#ef SOCKET IO
 io.on('connection', function(socket) {
 
-  //##ef Stop Broadcast
-  socket.on('sf004_stop', function(data) {
+  socket.on('msgFromBrowser', function(data) {
+    console.log(data);
+    udpPort.send(data);
+  });
 
-    socket.broadcast.emit('sf004_stop_broadcastFromServer', {
-      pieceId: pieceId,
-    });
+  //send msg to clients
+  // socket.broadcast.emit('sf004_stop_broadcastFromServer', {
+  //   pieceId: pieceId,
+  // });
+  // socket.emit('sf004_stop_broadcastFromServer', {
+  //   pieceId: pieceId,
+  // });
 
-    socket.emit('sf004_stop_broadcastFromServer', {
-      pieceId: pieceId,
-    });
-
-  }); // socket.on('sf004_stop', function(data) END
-  //##endef Stop Broadcast
-
-  }); // End Socket IO
+}); // End Socket IO
 //#endef >> END SOCKET IO

@@ -1,7 +1,10 @@
 //#ef NOTES
 /*
-ditch socket io get websockets working
-osc js examples send to supercollider
+install supercolliderjs to node modules
+Download SC code from git
+set up synthdefs
+use supercollider.js to launch sc server
+insta
 */
 //#endef NOTES
 
@@ -38,6 +41,7 @@ function init() {
   let ts_Date = new Date(TS.now());
   let tsNowEpochTime_MS = ts_Date.getTime();
   epochTimeOfLastFrame_MS = tsNowEpochTime_MS;
+  animationIsGo = true;
   requestAnimationFrame(animationEngine);
 }
 //#endef INIT
@@ -64,7 +68,9 @@ function animationEngine(timestamp) {
 
 function update() {
   if (FRAMECOUNT >= 0) {
-
+    if (FRAMECOUNT == 60) {
+      sendMSG();
+    }
   }
 }
 //#endef Animation Engine
@@ -124,29 +130,28 @@ function mkStaffRects() {
 }
 //#endef Canvas
 
-
-var osc = new OSC();
-  osc.open(); // connect by default to ws://localhost:8080
-
-  document.getElementById('send').addEventListener('click', () => {
-    var message = new OSC.Message('/test/random', Math.random());
-    osc.send(message);
-  });
-
-//##ef Stop Piece Button Function & Socket
+//##ef osc msg
 function sendMSG() {
-  // Send stop command to server to broadcast to rest of players
-  SOCKET.emit('sf004_stop', { //stop also deletes this pieceId's score data on the server
-    pieceId: 1,
+  // Send to Server
+
+  SOCKET.emit('msgFromBrowser', {
+    address: "/hello/from/oscjs",
+    args: [{
+        type: "f",
+        value: Math.random()
+      },
+      {
+        type: "f",
+        value: Math.random()
+      }
+    ]
   });
-
-
-  //STOP PIECE RECEIVE SOCKET FROM SERVER BROADCAST
-  SOCKET.on('sf004_stop_broadcastFromServer', function(data) {
-
-  });
+  //Receive msg from server
+  // SOCKET.on('msgFromServer', function(data) {
+  //   console.log(data);
+  // });
 }
-//##endef Stop Piece Button Function & Socket
+//##endef oscmsg
 
 
 
